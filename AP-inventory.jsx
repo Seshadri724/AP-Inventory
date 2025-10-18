@@ -62,6 +62,7 @@ const AllOrganizations = Array.from(new Set([ // De-duplicate the combined list
 ])).sort();
 
 // --- LOCATION HIERARCHY (District, Mandal/Taluk, Village) ---
+// This is the ONLY declaration of LocationHierarchy
 const LocationHierarchy = {
     // Structure: District: { Taluk: [Village, Village, ...], ... }
     "Anantapuramu": {
@@ -193,39 +194,6 @@ const FullEquipmentList = Array.from(new Set([
     "Video Camera DVD"
 ])).sort();
 
-// --- LOCATION HIERARCHY (District, Mandal/Taluk, Village) ---
-const LocationHierarchy = {
-    // Structure: District: { Taluk: [Village, Village, ...], ... }
-    "Anantapuramu": {
-        "Gooty": ["Utakallu"],
-        "Guntakal": ["Sangala", "Kasapuram", "Konganapalle", "Sankarabanda"],
-        "Singanamala": ["Singanamala"],
-    },
-    "Parvathipuram Manyam": {
-        "Pachipenta": ["Kottavalasa", "Kotikipenta"],
-        "Makkuva": ["Papayyavalasa", "Chandrayyapeta"],
-        "Salur": ["Mirtivalasa"],
-    },
-    "Vizianagaram": {
-        "Bobbili": ["Bhojarajapuram"],
-        "Jami": ["Jami"],
-        "Vizinagaram": ["Vizinagaram"],
-    },
-    "Visakhapatnam": {
-        "Bheemunipatnam": ["Bheemunipatnam"],
-        "Gajuwaka": ["Gajuwaka"],
-        "Madugula": ["Madugula"],
-    },
-    "Krishna": {
-        "Mochilipatnam": ["Mochilipatnam"],
-        "Gudivada": ["Gudivada"],
-    },
-    "Guntur": {
-        "Tenali": ["Tenali"],
-        "Mangalagiri": ["Mangalagiri"],
-        "Guntur": ["Guntur"],
-    },
-};
 
 const OtherConfig = {
     'SourceTypes': ['Government Assets', 'Public Sector Unit', 'Private Sector', 'Rental Agency', 'Local Community', 'Other'],
@@ -309,7 +277,8 @@ const App = () => {
   const [aiLoading, setAiLoading] = useState(false);
 
   // Constants for Gemini API
-  const GEMINI_MODEL = "gemini-1.5-flash-latest";
+  // Using gemini-1.5-flash-latest to ensure stability
+  const GEMINI_MODEL = "gemini-1.5-flash-latest"; 
   const apiKey = ""; // Left empty for Canvas environment
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
