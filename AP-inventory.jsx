@@ -194,40 +194,6 @@ const FullEquipmentList = Array.from(new Set([
 ])).sort();
 
 
-// --- LOCATION HIERARCHY (District, Mandal/Taluk, Village) ---
-// This is the ONLY declaration of LocationHierarchy
-const LocationHierarchy = {
-    // Structure: District: { Taluk: [Village, Village, ...], ... }
-    "Anantapuramu": {
-        "Gooty": ["Utakallu"],
-        "Guntakal": ["Sangala", "Kasapuram", "Konganapalle", "Sankarabanda"],
-        "Singanamala": ["Singanamala"], 
-    },
-    "Parvathipuram Manyam": {
-        "Pachipenta": ["Kottavalasa", "Kotikipenta"],
-        "Makkuva": ["Papayyavalasa", "Chandrayyapeta"],
-        "Salur": ["Mirtivalasa"],
-    },
-    "Vizianagaram": {
-        "Bobbili": ["Bhojarajapuram"],
-        "Jami": ["Jami"],
-        "Vizinagaram": ["Vizinagaram"],
-    },
-    "Visakhapatnam": {
-        "Bheemunipatnam": ["Bheemunipatnam"],
-        "Gajuwaka": ["Gajuwaka"],
-        "Madugula": ["Madugula"],
-    },
-    "Krishna": {
-        "Mochilipatnam": ["Mochilipatnam"],
-        "Gudivada": ["Gudivada"],
-    },
-    "Guntur": {
-        "Tenali": ["Tenali"],
-        "Mangalagiri": ["Mangalagiri"],
-        "Guntur": ["Guntur"],
-    },
-};
 
 const OtherConfig = {
     'SourceTypes': ['Government Assets', 'Public Sector Unit', 'Private Sector', 'Rental Agency', 'Local Community', 'Other'],
@@ -311,7 +277,7 @@ const App = () => {
   const [aiLoading, setAiLoading] = useState(false);
 
   // Constants for Gemini API
-  const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
+  const GEMINI_MODEL = "gemini-1.5-flash-latest";
   const apiKey = ""; // Left empty for Canvas environment
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
@@ -1002,7 +968,7 @@ const LoginScreen = ({ authInstance, setIsAuthReady, setUserId, errorMessage, lo
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
             <div className="w-full max-w-sm bg-white rounded-xl shadow-2xl p-8 space-y-8">
-                <h1 className="text-4xl font-extrabold text-blue-600 text-center">TN ADMIN</h1>
+                <h1 className="text-4xl font-extrabold text-blue-600 text-center">AP ADMIN</h1>
                 <p className="text-gray-600 text-center text-lg">Sign in to Continue</p>
 
                 <div className="space-y-4">
