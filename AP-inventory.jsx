@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, collection, serverTimestamp, setLogLevel } from 'firebase/firestore';
-import { LogIn, ArrowRight, ArrowLeft, PlusCircle, XCircle, MapPin, CheckCircle, Sparkles } from 'lucide-react';
+import { LogIn, ArrowRight, ArrowLeft, PlusCircle, XCircle, MapPin, CheckCircle, Sparkles, Mail, Phone } from 'lucide-react';
 // Data is merged directly into this file to prevent file resolution errors.
 
 // --- Global Context Variables (MUST be used as provided by the environment) ---
@@ -938,6 +938,9 @@ const App = () => {
 // --- Separate Component for Login (Step 0) ---
 const LoginScreen = ({ authInstance, setIsAuthReady, setUserId, errorMessage, loading, onLoginSuccess }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loginMode, setLoginMode] = useState('phone'); // 'phone' or 'email'
     const [loginLoading, setLoginLoading] = useState(false);
 
     // This function primarily exists to simulate the UI interaction from the manual
@@ -946,39 +949,80 @@ const LoginScreen = ({ authInstance, setIsAuthReady, setUserId, errorMessage, lo
         setLoginLoading(true);
         
         // --- SIMULATION OF LOGIN PROCESS ---
+        // In a real app, this is where you would call:
+        // 1. signInWithPhoneNumber + OTP verification OR 
+        // 2. signInWithEmailAndPassword
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Check if auth was successful in the background (using token/anonymously)
+        // Since Firebase security rules are set by the environment, we rely on the 
+        // existing anonymous/custom token sign-in performed in the main App useEffect.
         const user = authInstance.currentUser;
         if (user) {
             setUserId(user.uid);
             // On successful sign-in, call the prop to advance the main app state
             onLoginSuccess();
         } else {
-            // Fallback (shouln't happen if __initial_auth_token is provided)
+            // Fallback sign-in attempt (should not be necessary if initialAuthToken exists)
             try {
                 await signInAnonymously(authInstance);
                 setUserId(authInstance.currentUser.uid);
                 onLoginSuccess();
             } catch(e) {
                 console.error("Manual fallback sign-in failed:", e);
+                // Display a generic error if the fallback also fails
+                // NOTE: The main App component's useEffect usually catches this failure early.
             }
         }
         // --- END SIMULATION ---
         setLoginLoading(false);
     };
 
+    // Determine if the main login button should be enabled
+    const isLoginButtonEnabled = useMemo(() => {
+        if (loginLoading || loading) return false;
+        if (loginMode === 'phone') {
+            return phoneNumber.length === 10;
+        }
+        if (loginMode === 'email') {
+            // Simple validation: check if email and password have been entered
+            return email.includes('@') && password.length >= 6; 
+        }
+        return false;
+    }, [loginLoading, loading, loginMode, phoneNumber, email, password]);
+
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-blue-100 flex items-center justify-center p-4">
             <div className="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-8 space-y-6 border border-gray-200">
                 <div className="text-center">
                     <h1 className="text-4xl font-bold text-gray-800">AP Admin Portal</h1>
-                    <p className="text-gray-500 mt-2">Secure Sign-In</p>
+                    <p className="text-gray-500 mt-2">Sign in to Continue</p>
                 </div>
 
-                <div className="space-y-4">
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-600">Registered Mobile Number</label>
-                    <div className="relative">
+                {/* Login Mode Toggle */}
+                <div className="flex bg-gray-100 rounded-lg p-1">
+                    <button
+                        onClick={() => setLoginMode('phone')}
+                        className={`flex-1 flex items-center justify-center py-2 rounded-lg font-semibold transition-colors ${
+                            loginMode === 'phone' ? 'bg-blue-500 text-white shadow' : 'text-gray-600 hover:bg-white'
+                        }`}
+                    >
+                        <Phone className="w-4 h-4 mr-2" /> Phone Number
+                    </button>
+                    <button
+                        onClick={() => setLoginMode('email')}
+                        className={`flex-1 flex items-center justify-center py-2 rounded-lg font-semibold transition-colors ${
+                            loginMode === 'email' ? 'bg-blue-500 text-white shadow' : 'text-gray-600 hover:bg-white'
+                        }`}
+                    >
+                        <Mail className="w-4 h-4 mr-2" /> Email / Password
+                    </button>
+                </div>
+
+                {/* Input Fields based on Mode */}
+                {loginMode === 'phone' ? (
+                    <div className="space-y-4">
+                        <label htmlFor="phone" className="block text-sm font-medium text-gray-600">Registered Mobile Number</label>
                         <input
                             type="tel"
                             id="phone"
@@ -988,12 +1032,33 @@ const LoginScreen = ({ authInstance, setIsAuthReady, setUserId, errorMessage, lo
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white/50 placeholder-gray-500 transition"
                         />
                     </div>
-                </div>
+                ) : (
+                    <div className="space-y-4">
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-600">Email Address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Enter email"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white/50 placeholder-gray-500 transition"
+                        />
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-600">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter password (min. 6 characters)"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white/50 placeholder-gray-500 transition"
+                        />
+                    </div>
+                )}
+                
 
                 <button
                     onClick={handleLogin}
-                    // Requires 10 digits to enable the button, per mobile app standard
-                    disabled={loginLoading || loading || phoneNumber.length !== 10} 
+                    disabled={!isLoginButtonEnabled} 
                     className="w-full flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 rounded-lg shadow-lg transition-all transform hover:scale-105 active:scale-100 disabled:opacity-60 disabled:pointer-events-none"
                 >
                     {loginLoading || loading ? 'Verifying...' : (
