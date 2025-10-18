@@ -193,7 +193,39 @@ const FullEquipmentList = Array.from(new Set([
     "Video Camera DVD"
 ])).sort();
 
-
+// --- LOCATION HIERARCHY (District, Mandal/Taluk, Village) ---
+const LocationHierarchy = {
+    // Structure: District: { Taluk: [Village, Village, ...], ... }
+    "Anantapuramu": {
+        "Gooty": ["Utakallu"],
+        "Guntakal": ["Sangala", "Kasapuram", "Konganapalle", "Sankarabanda"],
+        "Singanamala": ["Singanamala"],
+    },
+    "Parvathipuram Manyam": {
+        "Pachipenta": ["Kottavalasa", "Kotikipenta"],
+        "Makkuva": ["Papayyavalasa", "Chandrayyapeta"],
+        "Salur": ["Mirtivalasa"],
+    },
+    "Vizianagaram": {
+        "Bobbili": ["Bhojarajapuram"],
+        "Jami": ["Jami"],
+        "Vizinagaram": ["Vizinagaram"],
+    },
+    "Visakhapatnam": {
+        "Bheemunipatnam": ["Bheemunipatnam"],
+        "Gajuwaka": ["Gajuwaka"],
+        "Madugula": ["Madugula"],
+    },
+    "Krishna": {
+        "Mochilipatnam": ["Mochilipatnam"],
+        "Gudivada": ["Gudivada"],
+    },
+    "Guntur": {
+        "Tenali": ["Tenali"],
+        "Mangalagiri": ["Mangalagiri"],
+        "Guntur": ["Guntur"],
+    },
+};
 
 const OtherConfig = {
     'SourceTypes': ['Government Assets', 'Public Sector Unit', 'Private Sector', 'Rental Agency', 'Local Community', 'Other'],
@@ -799,7 +831,7 @@ const App = () => {
 
   const renderInput = (name, label, placeholder, type = 'text', hint = '') => (
     <div>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-600 mb-1">
         {label}
       </label>
       <input
@@ -809,16 +841,16 @@ const App = () => {
         value={formData[name]}
         onChange={handleChange}
         placeholder={placeholder}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white placeholder-gray-400"
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white/50 placeholder-gray-500 transition"
         required={!label.includes('(optional)')}
       />
-      {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
     </div>
   );
 
   const renderSelect = (name, label, options, onChangeHandler = handleChange, disabled = false) => (
     <div>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-600 mb-1">
         {label}
       </label>
       <select
@@ -826,7 +858,7 @@ const App = () => {
         name={name}
         value={formData[name]}
         onChange={onChangeHandler}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white disabled:bg-gray-200 disabled:text-gray-500"
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white/50 disabled:bg-gray-200/50 disabled:text-gray-500 transition"
         required
         disabled={disabled}
       >
@@ -855,22 +887,24 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-8 flex items-start justify-center">
-      <div className="w-full max-w-xl bg-gray-50 rounded-xl shadow-2xl p-6 sm:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-blue-100 p-4 sm:p-8 flex items-start justify-center">
+      <div className="w-full max-w-2xl bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-200">
         
         {/* Header and Step Indicators */}
-        <h1 className="text-3xl font-extrabold text-gray-800 mb-2">Inventory Entry</h1>
-        <p className="text-gray-500 mb-6">Please fill out all fields below to add/update the inventory.</p>
+        <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-800">Inventory Entry</h1>
+            <p className="text-gray-500 mt-2">Please fill out all fields below to add/update the inventory.</p>
+        </div>
 
         {currentStep < 7 && currentStep >= 1 && (
             <>
-                <div className="flex justify-between items-center mb-6 p-4 bg-white rounded-lg shadow border border-gray-200">
+                <div className="flex justify-between items-center mb-8 p-4 bg-white/60 rounded-xl shadow-inner border border-gray-100">
                     {[1, 2, 3, 4, 5, 6].map(step => (
                         <StepIndicator key={step} step={step} currentStep={currentStep} completedSteps={completedSteps} />
                     ))}
                 </div>
 
-                <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+                <div className="p-6 bg-white/60 rounded-xl shadow-md border border-gray-100">
                     {renderFormStep()}
                 </div>
 
@@ -966,30 +1000,34 @@ const LoginScreen = ({ authInstance, setIsAuthReady, setUserId, errorMessage, lo
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-            <div className="w-full max-w-sm bg-white rounded-xl shadow-2xl p-8 space-y-8">
-                <h1 className="text-4xl font-extrabold text-blue-600 text-center">AP ADMIN</h1>
-                <p className="text-gray-600 text-center text-lg">Sign in to Continue</p>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-blue-100 flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-8 space-y-6 border border-gray-200">
+                <div className="text-center">
+                    <h1 className="text-4xl font-bold text-gray-800">AP Admin Portal</h1>
+                    <p className="text-gray-500 mt-2">Secure Sign-In</p>
+                </div>
 
                 <div className="space-y-4">
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone number</label>
-                    <input
-                        type="tel"
-                        id="phone"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        placeholder="Enter registered mobile number"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                    />
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-600">Registered Mobile Number</label>
+                    <div className="relative">
+                        <input
+                            type="tel"
+                            id="phone"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            placeholder="Enter your 10-digit mobile number"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white/50 placeholder-gray-500 transition"
+                        />
+                    </div>
                 </div>
 
                 <button
                     onClick={handleLogin}
                     // Requires 10 digits to enable the button, per mobile app standard
                     disabled={loginLoading || loading || phoneNumber.length !== 10} 
-                    className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 rounded-lg shadow-lg transition-transform active:scale-95 disabled:opacity-50"
+                    className="w-full flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 rounded-lg shadow-lg transition-all transform hover:scale-105 active:scale-100 disabled:opacity-60 disabled:pointer-events-none"
                 >
-                    {loginLoading || loading ? 'Signing In...' : (
+                    {loginLoading || loading ? 'Verifying...' : (
                         <>
                             <LogIn className="w-5 h-5 mr-2" />
                             SIGN IN
@@ -998,12 +1036,12 @@ const LoginScreen = ({ authInstance, setIsAuthReady, setUserId, errorMessage, lo
                 </button>
                 
                 {errorMessage && (
-                    <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm border border-red-300">
+                    <div className="p-3 bg-red-100 text-red-800 rounded-lg text-sm border border-red-300 font-medium">
                         {errorMessage}
                     </div>
                 )}
                 {loading && !errorMessage && (
-                    <div className="p-3 bg-yellow-100 text-yellow-700 rounded-lg text-sm border border-yellow-300">
+                    <div className="p-3 bg-blue-100 text-blue-800 rounded-lg text-sm border border-blue-300 font-medium">
                         Initializing Firebase...
                     </div>
                 )}
